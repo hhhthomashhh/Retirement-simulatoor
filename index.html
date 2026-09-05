@@ -1,1 +1,204 @@
-<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>BC Retirement Decision Simulator v3.8</title><style>html,body{margin:0;height:100%;background:#08111f;color:#edf4ff;font-family:system-ui,sans-serif}.load{height:100%;display:grid;place-items:center;text-align:center;padding:24px;box-sizing:border-box}.spin{font-size:42px;animation:s 1s linear infinite}@keyframes s{to{transform:rotate(360deg)}}</style></head><body><div class="load"><div><div class="spin">🍁</div><h2>Loading Retirement Simulator…</h2></div></div><script>(async()=>{try{const names=['assets/v38b-00.txt','assets/v38b-01.txt','assets/v38b-02.txt','assets/v38b-03.txt','assets/v38b-04.txt','assets/v38b-05.txt'];const parts=await Promise.all(names.map(n=>fetch(n,{cache:'no-store'}).then(r=>{if(!r.ok)throw new Error(n);return r.text()})));const b64=parts.join('').trim();const bin=Uint8Array.from(atob(b64),c=>c.charCodeAt(0));const ds=new DecompressionStream('gzip');const html=await new Response(new Blob([bin]).stream().pipeThrough(ds)).text();const fixed=html.replace('v3.6','v3.8');document.open();document.write(fixed);document.close()}catch(e){document.body.innerHTML='<div class="load"><div><h2>Unable to load the Retirement Simulator</h2><p>Please refresh the page in a current version of Safari, Chrome, Edge, or Firefox.</p></div></div>';console.error(e)}})();</script></body></html>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
+<title>BC Retirement Decision Simulator v3.9</title>
+<link rel="stylesheet" href="src/ui/styles.css"><link rel="stylesheet" href="src/ui/mobile.css">
+<link rel="manifest" href="manifest.json"><meta name="theme-color" content="#08111f"><link rel="apple-touch-icon" href="icons/icon-192.png"></head>
+<body>
+<header>
+  <div class="brand"><h1>🍁 BC Retirement Decision Simulator <span class="pill">v3.9</span></h1><p>Local, offline retirement planning model • British Columbia • personal + corporate accounts</p></div>
+  <div class="actions"><div class="status"><span id="statusText">Ready</span><div class="progress"><i id="progressBar"></i></div></div><button class="btn" id="exportReportBtn" type="button">Export Full Report PDF</button><button class="btn" id="resetBtn" type="button">Reset</button><button class="btn primary" id="runBtn" type="button">▶ Run Simulation</button></div>
+</header>
+<main>
+<noscript><div class="warning-banner"><strong>JavaScript is not running.</strong> This simulator needs JavaScript for buttons and calculations. On iPad, Apple Files/Quick Look may display the HTML but leave controls inactive. Open it in Safari/a browser or use a hosted copy.</div></noscript>
+<div id="viewerWarning" class="warning-banner hidden"><strong>iPad local-file note:</strong> If you opened this from Apple Files and controls do not respond, you may be in a preview rather than a full Safari page. A hosted web copy is the most reliable way to use the simulator on iPad.</div>
+<div class="warning-banner"><strong>Planning model, not tax advice.</strong> The personal tax engine is more detailed than the earlier prototype, but it still omits some credits/deductions. The CCPC/HoldCo module is an explicit planning approximation and is not a T2 tax-return calculator.</div>
+<div class="grid">
+<aside>
+<div class="panel pad">
+  <div class="tabs"><button class="tab active" id="tabInputs" type="button">Inputs</button><button class="tab" id="tabAdvanced" type="button">Advanced</button><button class="tab" id="tabMethod" type="button">Method</button></div>
+  <div id="leftInputs">
+    <div class="section">
+      <div class="section-title">Household</div>
+      <div class="formgrid"><div><label>Household type</label><select id="household"><option value="couple">Couple</option><option value="single">Single</option></select></div><div><label>Plan to Person A age</label><input id="planAge" type="number" min="75" max="110" value="95"></div></div>
+      <div class="help">Retirement spending begins when Person A reaches their retirement age. Person B may keep contributing until their own retirement age.</div>
+    </div>
+    <div class="section">
+      <div class="section-title">Person A</div>
+      <div class="formgrid"><div><label>Current age</label><input id="aAge" type="number" value="53"></div><div><label>Retirement age</label><input id="aRet" type="number" value="56"></div></div>
+      <div class="formgrid three" style="margin-top:8px"><div><label>RRSP / RRIF</label><input id="aRRSP" type="number" value="1000000"></div><div><label>TFSA</label><input id="aTFSA" type="number" value="100000"></div><div><label>Unused TFSA room</label><input id="aTFSARoom" type="number" value="20000"></div></div>
+      <div class="formgrid" style="margin-top:8px"><div><label>Non-registered FMV</label><input id="aNR" type="number" value="1000000"></div><div><label>Non-reg ACB</label><input id="aACB" type="number" value="800000"></div></div>
+      <div class="formgrid three" style="margin-top:8px"><div><label>Annual RRSP add</label><input id="aAddRRSP" type="number" value="14000"></div><div><label>Annual TFSA add</label><input id="aAddTFSA" type="number" value="7000"></div><div><label>Annual non-reg add</label><input id="aAddNR" type="number" value="5000"></div></div>
+      <div class="formgrid" style="margin-top:8px"><div><label>CPP start age</label><input id="aCPPAge" type="number" min="60" max="70" value="65"></div><div><label>CPP annual @ 65</label><input id="aCPP65" type="number" value="18092"></div></div>
+      <div class="formgrid" style="margin-top:8px"><div><label>OAS start age</label><input id="aOASAge" type="number" min="65" max="70" value="65"></div><div><label>OAS annual @ 65</label><input id="aOAS65" type="number" value="9024"></div></div>
+      <div class="formgrid" style="margin-top:8px"><div><label>RRSP → RRIF conversion age</label><input id="aRRIFAge" type="number" min="55" max="71" value="71"></div><div class="help">Mandatory RRIF minimum starts the following year. Pension splitting applies only to qualifying RRIF income at age 65+.</div></div>
+    </div>
+    <div class="section" id="personBBlock">
+      <div class="section-title">Person B</div>
+      <div class="formgrid"><div><label>Current age</label><input id="bAge" type="number" value="50"></div><div><label>Retirement age</label><input id="bRet" type="number" value="56"></div></div>
+      <div class="formgrid three" style="margin-top:8px"><div><label>RRSP / RRIF</label><input id="bRRSP" type="number" value="800000"></div><div><label>TFSA</label><input id="bTFSA" type="number" value="0"></div><div><label>Unused TFSA room</label><input id="bTFSARoom" type="number" value="110000"></div></div>
+      <div class="formgrid" style="margin-top:8px"><div><label>Non-registered FMV</label><input id="bNR" type="number" value="400000"></div><div><label>Non-reg ACB</label><input id="bACB" type="number" value="250000"></div></div>
+      <div class="formgrid three" style="margin-top:8px"><div><label>Annual RRSP add</label><input id="bAddRRSP" type="number" value="8000"></div><div><label>Annual TFSA add</label><input id="bAddTFSA" type="number" value="7000"></div><div><label>Annual non-reg add</label><input id="bAddNR" type="number" value="3000"></div></div>
+      <div class="formgrid" style="margin-top:8px"><div><label>CPP start age</label><input id="bCPPAge" type="number" min="60" max="70" value="65"></div><div><label>CPP annual @ 65</label><input id="bCPP65" type="number" value="15000"></div></div>
+      <div class="formgrid" style="margin-top:8px"><div><label>OAS start age</label><input id="bOASAge" type="number" min="65" max="70" value="65"></div><div><label>OAS annual @ 65</label><input id="bOAS65" type="number" value="9024"></div></div>
+      <div class="formgrid" style="margin-top:8px"><div><label>RRSP → RRIF conversion age</label><input id="bRRIFAge" type="number" min="55" max="71" value="71"></div><div class="help">Mandatory RRIF minimum starts the following year. Pension splitting applies only to qualifying RRIF income at age 65+.</div></div>
+    </div>
+    <div class="section">
+      <div class="section-title">Corporate investment account (CCPC / HoldCo)</div>
+      <div class="formgrid"><div><label>Corporate portfolio FMV</label><input id="corp" type="number" value="2000000"></div><div><label>Investment ACB</label><input id="corpACB" type="number" value="1750000"></div></div>
+      <div class="formgrid three" style="margin-top:8px"><div><label>CDA balance</label><input id="corpCDA" type="number" value="25000"></div><div><label>RDTOH balance</label><input id="corpRDTOH" type="number" value="0"></div><div><label>Annual corp addition</label><input id="corpAdd" type="number" value="50000"></div></div>
+      <div class="formgrid three" style="margin-top:8px"><div><label>Corp additions stop at Person A age</label><input id="corpAddUntil" type="number" min="0" max="120" value="56"></div><div><label>Person A ownership %</label><input id="corpOwnerA" type="number" min="0" max="100" value="100"></div><div><label>Use CDA first?</label><select id="useCDA"><option value="yes">Yes</option><option value="no">No</option></select></div></div>
+      <div class="help">Annual corporate additions are made while Person A is younger than the stop age above. For example, a stop age of 60 permits additions at ages 55–59 and stops them starting at age 60. Corporate tax treatment is approximate: it models passive-income tax, a combined refundable tax pool, CDA creation on realized gains, and dividend refunds. It does not model every T2 pool or GRIP/ERDTOH distinction.</div>
+    </div>
+    <div class="section">
+      <div class="section-title">Recurring passive income (rental / other ordinary income)</div>
+      <div class="formgrid"><div><label>Net cash flow / yr before personal tax (today $)</label><input id="passiveCash" type="number" value="0"></div><div><label>Taxable income / yr (today $)</label><input id="passiveTaxable" type="number" value="0"></div></div>
+      <div class="formgrid three" style="margin-top:8px"><div><label>Person A ownership %</label><input id="passiveOwnerA" type="number" min="0" max="100" value="100"></div><div><label>Starts at Person A age</label><input id="passiveStart" type="number" min="0" max="120" value="56"></div><div><label>Stops at Person A age</label><input id="passiveStop" type="number" min="0" max="120" value="110"></div></div>
+      <div class="formgrid" style="margin-top:8px"><div><label>Index income with simulated inflation?</label><select id="passiveIndex"><option value="yes" selected>Yes</option><option value="no">No</option></select></div><div><label>Tax character</label><select id="passiveTaxType" disabled><option selected>Ordinary income (e.g. rental)</option></select></div></div>
+      <div class="help">Enter the actual annual cash left from the property/business source before personal income tax separately from the taxable income reported on the tax return. They can differ because cash expenses and tax deductions are not always the same. Income is allocated between spouses using the ownership percentage above and is included in personal tax and OAS-clawback calculations. Income is received while Person A is at or above the start age and below the stop age.</div>
+      <div class="help" style="margin-top:6px"><strong>Before retirement:</strong> any after-tax passive cash is treated as additional to the explicit RRSP/TFSA/non-registered/corporate additions above and is reinvested. If those stated annual additions are actually funded from this passive income, start this income at retirement or reduce the contribution inputs to avoid double-counting.</div>
+    </div>
+    <div class="section">
+      <div class="section-title">Spending & withdrawal policy</div>
+      <div class="formgrid"><div><label>After-tax household spending / yr (today $)</label><input id="spend" type="number" value="120000"></div><div><label>One-time retirement purchase (today $)</label><input id="lump" type="number" value="0"></div></div>
+      <div class="formgrid" style="margin-top:8px"><div><label>Essential-lifestyle floor (% of recurring target)</label><input id="essentialFloor" type="number" min="10" max="100" step="5" value="70"><div class="help">A path is a severe shortfall if recurring lifestyle funding falls below this level in any retirement year.</div></div><div><label>Decision-dashboard meaning</label><div class="help" style="margin-top:7px">This separates a manageable spending adjustment from a genuinely serious lifestyle shortfall. One-time purchases do not count toward the essential-lifestyle floor.</div></div></div>
+      <div class="formgrid" style="margin-top:8px"><div><label>One-time purchase at Person A age</label><input id="lumpAge" type="number" value="56"></div><div><label>Withdrawal strategy</label><select id="strategy"><option value="balanced">Balanced: NonReg → Corp → RRSP → TFSA</option><option value="rrsp">RRSP melt: RRSP → NonReg → Corp → TFSA</option><option value="corp">Corporate first: Corp → NonReg → RRSP → TFSA</option><option value="tfsa">TFSA first: TFSA → NonReg → Corp → RRSP</option></select></div></div>
+      <div class="help" style="margin-top:8px">The one-time purchase is inflation-adjusted from today's dollars and is always funded at 100% if assets permit. It is excluded from the guardrail withdrawal-rate benchmark and is never reduced by the spending guardrail.</div><div class="inline" style="margin-top:10px"><input id="guardrails" type="checkbox" checked><label for="guardrails">Simplified Guyton-Klinger-style spending guardrails (recurring spending only)</label></div>
+      <div class="inline" style="margin-top:8px"><input id="pensionSplit" type="checkbox" checked><label for="pensionSplit">Optimize eligible pension-income splitting (0–50%)</label></div>
+    </div>
+  </div>
+  <div id="leftAdvanced" class="hidden">
+    <div class="section"><div class="section-title">Sequence test mode</div>
+      <div><label>Simulation mode</label><select id="simMode"><option value="mc" selected>Monte Carlo — random paths</option><option value="historical">Historical / Hybrid — retirement starts 1900–2025</option></select></div>
+      <div id="mcModeInputs" style="margin-top:8px"><div class="formgrid"><div><label>Simulation paths</label><select id="sims"><option value="2000">2,000 quick</option><option value="10000" selected>10,000 standard</option><option value="25000">25,000 detailed</option></select></div><div><label>Random seed</label><input id="seed" type="number" value="20260810"></div></div><div class="inline" style="margin-top:8px"><input id="autoSeed" type="checkbox" checked><label for="autoSeed">Use a new random seed each run</label></div><div id="seedHelp" class="help">Checked = each Run Simulation generates a fresh set of Monte Carlo paths. Uncheck to reproduce the exact same paths with the seed above.</div>
+      <div class="formgrid" style="margin-top:8px"><div><label>Return distribution</label><select id="dist"><option value="fat" selected>Fat-tailed (Student-t)</option><option value="normal">Normal</option></select></div><div><label>Inflation volatility</label><input id="infStd" type="number" step="0.1" value="1.2"><div class="help">Standard deviation, %</div></div></div></div>
+      <div id="histModeInputs" class="hidden" style="margin-top:8px">
+        <div class="formgrid"><div><label>First retirement start year</label><input id="histStart" type="number" value="1900" min="1900" max="2025"></div><div><label>Last retirement start year</label><input id="histEnd" type="number" value="2025" min="1900" max="2025"></div></div>
+        <div class="help" style="margin-top:8px">Each start year is tested once. Person A's retirement age is aligned to that calendar year. Actual annual stock/bond proxy returns and Canadian inflation are used through 2025; any remaining years are completed with the same seeded Monte Carlo engine.</div>
+      </div>
+    </div>
+    <div class="section"><div class="section-title">2026 FP Canada geometric assumptions</div>
+      <div class="formgrid three"><div><label>Inflation %</label><input id="inflation" type="number" step="0.1" value="2.1"></div><div><label>Fixed income %</label><input id="gmFI" type="number" step="0.1" value="3.2"></div><div><label>Canadian equity %</label><input id="gmCAD" type="number" step="0.1" value="6.3"></div></div>
+      <div class="formgrid" style="margin-top:8px"><div><label>U.S. equity %</label><input id="gmUS" type="number" step="0.1" value="6.4"></div><div><label>International developed %</label><input id="gmINTL" type="number" step="0.1" value="6.6"></div></div>
+      <div class="help">The engine converts geometric assumptions to arithmetic means for Monte Carlo. For equities it also adds back FP Canada's 0.50% safety margin before the conversion.</div>
+    </div>
+    <div class="section"><div class="section-title">Volatility & allocation</div>
+      <div class="formgrid three"><div><label>Fixed-income SD %</label><input id="sdFI" type="number" value="5.5"></div><div><label>CAD equity SD %</label><input id="sdCAD" type="number" value="15.5"></div><div><label>US equity SD %</label><input id="sdUS" type="number" value="16.5"></div></div>
+      <div class="formgrid" style="margin-top:8px"><div><label>International SD %</label><input id="sdINTL" type="number" value="17.0"></div><div><label>Personal investment fee %</label><input id="fee" type="number" step="0.05" value="0.60"></div></div>
+      <div class="formgrid" style="margin-top:8px"><div><label>Personal equity allocation %</label><input id="eqPersonal" type="number" value="60"></div><div><label>Corporate equity allocation %</label><input id="eqCorp" type="number" value="55"></div></div>
+      <div class="formgrid" style="margin-top:8px"><div><label>Extreme 1-year loss limit %</label><input id="maxDrop" type="number" min="5" max="95" step="1" value="50"><div class="help">Monte Carlo downside boundary for blended personal and corporate portfolio returns. Example: 50 means randomized returns are smoothly compressed as they approach −50% instead of being clipped to exactly −50%. Compression starts at about 90% of the chosen limit. Historical years are not altered.</div></div><div><label>Extreme 1-year gain limit %</label><input id="maxGain" type="number" min="20" max="150" step="5" value="75"><div class="help">Monte Carlo upside boundary. Example: 75 means unusually strong randomized portfolio returns are smoothly compressed as they approach +75%; compression begins near +67.5%. It is a modelling boundary, not a forecast that +75% will occur. Historical proxy years remain unaltered.</div></div></div>
+      <div class="help">Within equity, this model uses 30% Canada / 45% U.S. / 25% international. Volatility values are editable modelling assumptions, not FP Canada guidelines.</div>
+    </div>
+    <div class="section"><div class="section-title">Corporate tax approximation</div>
+      <div class="formgrid"><div><label>Passive-income tax rate %</label><input id="corpPassiveTax" type="number" step="0.01" value="50.67"></div><div><label>Refundable portion %</label><input id="corpRefundable" type="number" step="0.01" value="30.67"></div></div>
+      <div class="formgrid" style="margin-top:8px"><div><label>Dividend-refund rate %</label><input id="corpRefundRate" type="number" step="0.01" value="38.33"></div><div><label>Corporate investment fee %</label><input id="corpFee" type="number" step="0.05" value="0.60"></div></div>
+    </div>
+  </div>
+  <div id="leftMethod" class="hidden method">
+    <h3>What this version fixes</h3><p><strong>v3.4:</strong> adds an automatic five-allocation retirement-outcome comparison using identical underlying paths and reports full/flexible spending success, purchasing-power failure, severe shortfall, depletion, market drawdown, spending cuts, years below target, estate values, and early-sequence resilience. <strong>v3.3:</strong> improves the Ending After-Tax Liquidation Value chart with multiple rounded X-axis dollar labels and vertical guides so intermediate ending values are easier to estimate. <strong>v3.2:</strong> fixes a v3.1 dashboard rendering error caused by a missing decision-status function. <strong>v3.1:</strong> replaces the old hard-clamped loss floor with a smooth Monte Carlo tail boundary. Extreme randomized returns are compressed as they approach the selected loss limit rather than being forced to exactly the same number. Historical proxy years remain unaltered. Return diagnostics now emphasize a bad-decile path statistic and separately report the absolute worst observation and raw Monte Carlo draws that crossed the selected boundary. <strong>v2.9:</strong> adds a user-adjustable maximum one-year blended portfolio drop in Advanced settings and improves Safari/iPad interaction with standard event listeners, larger touch targets, and no automatic 10,000-path run on page load. <strong>Portfolio depletion risk</strong> is tracked separately from spending cuts: a path is counted as depleted if gross investable assets fall to $1,000 or less before the final planning year. Taxes are part of the cash-flow equation: withdrawals continue until the household has enough <strong>after-tax</strong> cash to meet the spending target. Non-registered sales use FMV and ACB to calculate realized gains. RRSP→RRIF conversion age is explicit; mandatory RRIF withdrawals begin in the year after conversion, and surplus cash is reinvested rather than disappearing. <strong>One-time purchases are separated from recurring spending:</strong> they are funded in full, excluded from the guardrail benchmark, and never reduced by a guardrail cut. They can still affect later years by lowering the remaining portfolio. <strong>Recurring passive income is now modelled separately as cash flow and taxable ordinary income</strong>, with spouse ownership, start/stop ages and optional inflation indexing.</p>
+    <h3>2026 personal-tax basis</h3><p>The annual model starts with 2026 federal and British Columbia brackets, 2026 basic personal amounts, dividend gross-ups/credits, 50% capital-gains inclusion, and OAS recovery tax. Federal brackets are projected with simulated inflation. B.C. brackets are held at 2026 levels through 2030 to reflect the announced B.C. indexation pause, then indexed thereafter.</p>
+    <h3>Investment returns</h3><p>Monte Carlo mode uses FP Canada's 2026 geometric assumptions, converted to arithmetic means with correlated shocks. In v2.6+, the Cholesky shock is applied once at its full covariance-scaled volatility (correcting the double volatility scaling in v2.5). v3.5 uses separate editable downside and upside portfolio-return boundaries. Randomized returns are smoothly compressed only in the extreme tails rather than hard-clipped; the diagnostics report raw draws that crossed either chosen boundary. The headline 1-year diagnostics use bad-decile worst-year and good-decile best-year statistics, while the absolute extremes remain visible underneath. Historical / Hybrid mode aligns Person A's retirement age to each start year and uses a long-run U.S. total-equity-return proxy and U.S. government-bond total-return proxy, with Canadian CPI inflation, through 2025. Historical proxy years are never altered by the Monte Carlo tail boundaries; only any randomized post-2025 tail is limited. Historical mode is therefore a <strong>sequence-risk stress test</strong>, not an exact reconstruction of a Canada/U.S./international portfolio.</p>
+    <h3>Non-registered accounts</h3><p>Equity distributions are approximated as one-third of expected equity return, consistent with FP Canada's discussion that 33% of equity return is a reasonable dividend assumption. Canadian-equity dividends receive eligible-dividend treatment; foreign dividends and fixed-income distributions are treated as ordinary income. Capital appreciation remains unrealized until sale.</p>
+    <h3>Corporate account</h3><p>The HoldCo model is intentionally labelled an approximation. It separately models passive-income tax on distributions, refundable tax, CDA creation from the non-taxable half of realized capital gains, and dividend refunds. It does <strong>not</strong> reproduce all CCPC tax pools or the exact treatment of every security. Use an accountant's projections for implementation decisions.</p>
+    <h3>Sources built into this version</h3>
+    <p>CRA 2026 federal/BC rates: <a href="https://www.canada.ca/en/revenue-agency/services/tax/individuals/tax-rates-brackets/current-year.html">Canada.ca current-year tax rates</a><br>BC rates/credits: <a href="https://www2.gov.bc.ca/gov/content/taxes/income-taxes/personal/tax-rates">B.C. personal tax rates</a><br>FP Canada: <a href="https://www.fpcanada.ca/docs/professionalsitelibraries/standards/projection-assumption-guidelines.pdf">2026 Projection Assumption Guidelines</a><br>TFSA room: <a href="https://www.canada.ca/en/revenue-agency/services/tax/individuals/topics/tax-free-savings-account/contributing/calculate-room.html">CRA TFSA room</a><br>Historical return proxies: Jordà-Schularick-Taylor Macrohistory Database (pre-1928) and Aswath Damodaran U.S. stock/bond annual returns (1928–2025)<br>Canadian inflation: long-run Canadian CPI plus Statistics Canada annual-average CPI for 2021–2025.</p>
+    <h3>Important omissions</h3><p>No GIS, no AMT, no foreign tax credits, no charitable credits, no disability credits, no detailed age/pension credits, no principal residence, no RRSP contribution-room calculation, RRIF minimums use the account holder's age (not an elected younger-spouse age), no first-death/second-death rollover engine, and no full T2 corporate-tax calculation. These omissions are deliberate so the model remains transparent.</p>
+  </div>
+</div>
+</aside>
+<section>
+  <div class="panel decision">
+    <div class="decision-top">
+      <div class="decision-title">
+        <h2>Retirement Decision Dashboard</h2>
+        <p>Focuses on what the plan can fund, how painful bad outcomes are, and what to test next — not just a single Monte Carlo success score.</p>
+      </div>
+      <div id="planStatus" class="status-badge blue">Run simulation</div>
+    </div>
+    <div class="decision-kpis">
+      <div class="kpi"><div class="name">Full lifestyle success</div><div id="kFull" class="val">--</div><div class="sub">Full recurring target + full one-time purchase, no guardrail cut</div></div>
+      <div class="kpi"><div class="name">Flexible-plan success</div><div id="kFlex" class="val">--</div><div id="kFlexSub" class="sub">Adjusted recurring target funded</div></div>
+      <div class="kpi"><div class="name">Severe shortfall risk</div><div id="kSevere" class="val">--</div><div id="kSevereSub" class="sub">Below essential-lifestyle floor</div></div>
+      <div class="kpi"><div class="name">Portfolio depletion risk</div><div id="kDeplete" class="val">--</div><div id="kDepleteSub" class="sub">Assets ≤ $1,000 before horizon</div></div>
+      <div class="kpi"><div class="name">P10 minimum lifestyle funded</div><div id="kLifestyleP10" class="val">--</div><div class="sub">Bad-decile path: worst retirement year vs planned recurring spending</div></div>
+      <div class="kpi"><div class="name">Bad-decile max annual cut</div><div id="kCutP90" class="val">--</div><div class="sub">90th percentile of each path's largest recurring-spending cut, today $</div></div>
+      <div class="kpi"><div class="name">P10 after-tax liquidation</div><div id="kP10" class="val warn">--</div><div id="kP10Sub" class="sub">Downside ending estate / portfolio value</div></div>
+      <div class="kpi"><div class="name">Median after-tax liquidation</div><div id="kP50" class="val blue">--</div><div id="kP50Sub" class="sub">End of planning horizon</div></div>
+      <div class="kpi"><div class="name">Median lifetime tax</div><div id="kTax" class="val purple">--</div><div id="kTaxSub" class="sub">Personal + modelled corporate tax</div></div>
+    </div>
+    <div id="decisionSummary" class="decision-summary">Run the simulation to see a decision-oriented interpretation.</div>
+    <div class="decision-actions">
+      <div class="action-card"><div class="a-title">Spending decision</div><div id="actionSpend" class="a-body">—</div></div>
+      <div class="action-card"><div class="a-title">Downside decision</div><div id="actionRisk" class="a-body">—</div></div>
+      <div class="action-card"><div class="a-title">Tax / withdrawal decision</div><div id="actionTax" class="a-body">—</div></div>
+    </div>
+  </div>
+  <div class="panel pad alloc-compare" id="allocationComparisonPanel">
+    <div class="alloc-head">
+      <div><h2>Asset Allocation Comparison</h2><p>Automatically compares 100/0, 90/10, 80/20, 70/30 and 60/40 equity/fixed-income portfolios using the same return paths, inflation, spending, taxes, CPP/OAS, purchase assumptions, withdrawal strategy and guardrail rules. The tested allocation is applied to both personal and corporate investment accounts.</p></div>
+      <div id="allocBestBadge" class="status-badge blue">Runs with simulation</div>
+    </div>
+    <div id="allocSummary" class="alloc-summary">Run the simulation to compare allocations on retirement outcomes rather than volatility alone.</div>
+    <div class="alloc-table-wrap"><table class="alloc-table">
+      <thead><tr><th>Allocation</th><th>Full spending<br>success</th><th>Flexible<br>success</th><th>Purchasing-power<br>failure</th><th>Severe<br>shortfall</th><th>Depletion<br>risk</th><th>Bad-decile max<br>market drawdown</th><th>Bad-decile largest<br>annual cut</th><th>Bad-decile years<br>below target</th><th>Median after-tax<br>estate</th><th>P5 after-tax<br>estate</th><th>Full success in worst<br>20% early sequences</th></tr></thead>
+      <tbody id="allocTableBody"><tr><td colspan="12" style="text-align:left;color:#7890ad;padding:12px">Run the simulation to populate the comparison.</td></tr></tbody>
+    </table></div>
+    <div class="alloc-legend"><strong>Purchasing-power failure</strong> means planned real recurring spending was not fully funded in at least one retirement year while more than $1,000 of investable assets still remained. <strong>Bad-decile max market drawdown</strong> is the 90th percentile of each path’s maximum peak-to-trough decline in a return-only retirement portfolio index, so withdrawals do not artificially create the drawdown. <strong>Bad-decile years below target</strong> is the 90th percentile of the number of retirement years in which full planned recurring spending was not delivered. <strong>Early-sequence resilience</strong> shows full-spending success among the worst 20% of first-five-retirement-year return sequences. “Overall leader” prioritizes full-spending success; near-ties are broken by lower severe shortfall, lower depletion, then higher P5 estate.</div>
+  </div>
+  <div class="panel pad rep-path" id="representativePathPanel">
+    <div class="rep-head">
+      <div><h2>Representative Path Cash Flow</h2><p>Shows detailed year-by-year account activity for representative outcomes from the primary simulation. P10, Median and P90 are selected by ending after-tax liquidation value; Absolute Worst/Best show the most extreme ending outcomes. The selected path is re-run deterministically with detailed accounting, so the 10,000-path simulation does not need to store 10,000 full ledgers.</p></div>
+      <div id="repPathBadge" class="status-badge blue">Runs with simulation</div>
+    </div>
+    <div class="rep-tabs" id="repPathTabs">
+      <button type="button" class="rep-tab" data-rep="p10">P10 downside</button>
+      <button type="button" class="rep-tab active" data-rep="p50">Median P50</button>
+      <button type="button" class="rep-tab" data-rep="p90">P90 upside</button>
+      <button type="button" class="rep-tab" data-rep="worst">Absolute worst</button>
+      <button type="button" class="rep-tab" data-rep="best">Absolute best</button>
+    </div>
+    <div id="repPathSummary" class="rep-summary"><div class="rep-stat"><div class="n">Starting investment</div><div class="v">--</div></div></div>
+    <div id="repFlowSummary" class="rep-flow-summary">Run the simulation to populate representative-path cash flows.</div>
+    <div class="rep-table-wrap"><table class="rep-table">
+      <thead><tr><th>Age / status</th><th>Calendar<br>year</th><th>Personal portfolio<br>return</th><th>Start total<br>investment</th><th>RRSP/RRIF<br>in / out</th><th>RRSP/RRIF<br>end balance</th><th>TFSA<br>in / out</th><th>TFSA<br>end balance</th><th>Non-reg<br>in / out</th><th>Non-reg<br>end balance</th><th>Corporation<br>in / out</th><th>Corporation<br>end balance</th><th>CPP + OAS</th><th>Passive<br>cash income</th><th>Tax paid<br>(net)</th><th>Actual<br>spending</th><th>End total<br>investment</th></tr></thead>
+      <tbody id="repPathBody"><tr><td colspan="17" style="text-align:left;color:#7890ad;padding:12px">Run the simulation to populate the table.</td></tr></tbody>
+    </table></div>
+    <div class="rep-help"><strong>Account flow:</strong> “+$” means money added/reinvested into that account and “−$” means money withdrawn/sold. If both occurred in the same year, both are shown. RRSP/RRIF combines both spouses and includes mandatory RRIF withdrawals. TFSA and non-registered additions can include reinvested surplus cash. Corporation “out” is the investment amount sold/distributed; tax shown is total personal tax plus net modelled corporate investment tax/refunds for that year. Pre-retirement household living expenses are not modelled, so the Spending column is shown only after Person A retires. Account-flow and account-balance dollars are nominal for that simulated year; the final End Total column also shows the equivalent in today's dollars. Lifetime modeled tax is tax paid during the plan; the hypothetical tax cost of liquidating all remaining assets at the final horizon is reflected in the Ending after-tax liquidation value, not added again to lifetime tax.</div>
+  </div>
+  <div class="panel pad" style="margin-top:12px">
+    <div class="section-title">Portfolio-return diagnostics</div>
+    <div id="returnDiagSub" class="help" style="margin-bottom:9px">Severe personal-portfolio return diagnostics, with tail-limit transparency.</div>
+    <div class="returndiag">
+      <div class="kpi"><div class="name">Bad-decile worst 1-year</div><div id="kWorst1" class="val bad">--</div><div id="kWorst1Sub" class="sub">10th percentile of each path's worst year</div></div>
+      <div class="kpi"><div class="name">Good-decile best 1-year</div><div id="kBest1" class="val good">--</div><div id="kBest1Sub" class="sub">90th percentile of each path's best year</div></div>
+      <div class="kpi"><div class="name">Worst 3-year cumulative</div><div id="kWorst3" class="val bad">--</div><div id="kWorst3Sub" class="sub">Compounded return</div></div>
+      <div class="kpi"><div class="name">Best 3-year cumulative</div><div id="kBest3" class="val good">--</div><div id="kBest3Sub" class="sub">Compounded return</div></div>
+    </div>
+  </div>
+  <div class="panel chart"><div class="chart-head"><div><h3>Gross Invested Assets — Sequence Fan Chart</h3><p>10th–90th percentile band, 25th–75th band and median. All values are nominal dollars.</p></div><button type="button" class="btn chart-export" data-chart-pdf="fanChart">Export Chart PDF</button></div><canvas id="fanChart" width="1100" height="380"></canvas></div>
+  <div class="two">
+    <div class="panel chart mini"><div class="chart-head"><div><h3>Ending After-Tax Liquidation Value</h3><p>Distribution across tested paths / start years.</p></div><button type="button" class="btn chart-export" data-chart-pdf="histChart">Export Chart PDF</button></div><canvas id="histChart" width="550" height="280"></canvas></div>
+    <div class="panel chart mini"><div class="chart-head"><div><h3>Failure / Spending-Cut Profile</h3><p>Probability by Person A age of a recurring-spending guardrail cut or any funding shortfall. One-time purchases are never themselves guardrailed.</p></div><button type="button" class="btn chart-export" data-chart-pdf="riskChart">Export Chart PDF</button></div><canvas id="riskChart" width="550" height="280"></canvas></div>
+  </div>
+  <div id="historicalResults" class="panel pad hidden" style="margin-top:12px">
+    <div class="section-title">Historical / Hybrid start-year results</div>
+    <div class="help" style="margin-bottom:8px">Each row represents one hypothetical retirement start year. Historical years use known data through 2025; the remainder uses the seeded random engine.</div>
+    <div id="historicalTable" style="max-height:360px;overflow:auto"></div>
+  </div>
+  <div class="panel pad" style="margin-top:12px">
+    <div class="section-title">Interpretation</div>
+    <div id="interpretation" class="note">Run the simulation to see results. By default, each run uses a new seed; uncheck “Use a new random seed each run” when you want exact reproducibility for strategy comparisons.</div>
+  </div>
+</section>
+</div>
+<div class="footer">BC Retirement Decision Simulator v3.9 • Model date: August 2026 • Educational planning use only</div>
+</main>
+<script src="src/core/expense-engine.js"></script>
+<script src="src/core/retirement-engine.js"></script>
+<script src="src/core/monte-carlo-engine.js"></script>
+<script src="src/storage/storage-service.js"></script>
+<script src="src/ui/legacy-ui.js"></script>
+<script src="src/ui/expense-ui.js"></script>
+</body></html>
