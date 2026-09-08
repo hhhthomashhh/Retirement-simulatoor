@@ -1,5 +1,5 @@
 const VERSION='retirement-4.0.3';
-const SHELL=['./','./index.html','./manifest.json','./icons/icon-192.png','./icons/icon-512.png','./p403-00.txt','./p403-01.txt','./p403-02.txt','./p403-03.txt','./p403-04.txt','./p403-05.txt','./p403-06.txt','./p403-07.txt','./p403-08.txt','./p403-09.txt','./p403-10.txt'];
+const SHELL=['./','./index.html','./manifest.json','./icons/icon-192.png','./icons/icon-512.png','./p403-00a.txt','./p403-00b.txt','./p403-01.txt','./p403-02.txt','./p403-03.txt','./p403-04.txt','./p403-05.txt','./p403-06.txt','./p403-07.txt','./p403-08.txt','./p403-09.txt','./p403-10.txt'];
 const CACHE=VERSION+'-'+self.registration.scope;
 self.addEventListener('install',e=>e.waitUntil(caches.open(CACHE).then(c=>c.addAll(SHELL)).then(()=>self.skipWaiting())));
 self.addEventListener('activate',e=>e.waitUntil(caches.keys().then(keys=>Promise.all(keys.filter(k=>k.startsWith('retirement-')&&k.endsWith(self.registration.scope)&&k!==CACHE).map(k=>caches.delete(k)))).then(()=>self.clients.claim())));
