@@ -1,0 +1,37 @@
+{
+  "fixture": "Public v4.0.3 repository defaults, not a personal financial recommendation",
+  "version": "4.1.0-dev",
+  "age": 53,
+  "success": 1,
+  "successInterval": {
+    "low": 0.9925527526279385,
+    "high": 1
+  },
+  "spending": 147000,
+  "spendingSuccess": 0.92578125,
+  "spendingConfirmed": true,
+  "policy": {
+    "kind": "searched",
+    "strategy": "corp",
+    "label": "Multiyear income-target policy",
+    "rrspTargets": [
+      30000,
+      0,
+      0
+    ],
+    "corpFractions": [
+      0,
+      0,
+      0.75
+    ]
+  },
+  "medianTax": 2404099.6633495893,
+  "medianEstate": 5039543.765077252,
+  "baselineMedianTax": 2616518.93797055,
+  "baselineMedianEstate": 4508269.493891173,
+  "historicalWindows": 85,
+  "historicalSuccess": 1,
+  "bootstrapSuccess": 0.9921875,
+  "evaluations": 237,
+  "seconds": 52.810038499
+}

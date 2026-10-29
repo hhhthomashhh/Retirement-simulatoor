@@ -1,0 +1,1 @@
+{"name":"canadian-retirement-optimizer","version":"4.1.0-dev","private":true,"scripts":{"test":"node --test tests/*.test.cjs && node tests/regression.cjs && python3 tests/static-check.py","rebuild":"python3 scripts/prepare-modules.py && python3 scripts/build-ui.py"}}
