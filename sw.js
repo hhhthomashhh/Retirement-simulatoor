@@ -1,6 +1,6 @@
-const VERSION='retirement-4.1.0-dev-1';
+const VERSION='retirement-4.1.0-dev-2-pdf';
 const CACHE=VERSION+'-'+self.registration.scope;
-const SHELL=["./", "./index.html", "./manifest.json", "./icons/icon-192.png", "./icons/icon-512.png", "optimizer/core-v403.js", "optimizer/engine.js", "optimizer/legacy-ui.js", "optimizer/legacy.css", "optimizer/optimizer.css", "optimizer/optimizer.js", "optimizer/storage.js", "optimizer/ui.js", "optimizer/worker.js"];
+const SHELL=["./", "./index.html", "./manifest.json", "./icons/icon-192.png", "./icons/icon-512.png", "optimizer/core-v403.js", "optimizer/engine.js", "optimizer/legacy-ui.js", "optimizer/legacy.css", "optimizer/optimizer.css", "optimizer/optimizer.js", "optimizer/report.js", "optimizer/storage.js", "optimizer/ui.js", "optimizer/worker.js"];
 self.addEventListener('install',e=>e.waitUntil(caches.open(CACHE).then(c=>c.addAll(SHELL))));
 self.addEventListener('message',e=>{if(e.data?.type==='SKIP_WAITING')self.skipWaiting();});
 self.addEventListener('activate',e=>e.waitUntil(caches.keys().then(keys=>Promise.all(keys.filter(k=>k.startsWith('retirement-')&&k.endsWith(self.registration.scope)&&k!==CACHE).map(k=>caches.delete(k)))).then(()=>self.clients.claim())));
