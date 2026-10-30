@@ -12,6 +12,10 @@ A tested development upgrade of **Retirement Simulator v4.0.3**, for BC resident
 4. Enter household information and balances. Review savings, CPP/OAS and enabled irregular expenses in the detailed section. Select **Find my retirement plan**.
 5. Read the recommended age, validated spending budget, full-goal success and comparison of withdrawals. Inspect annual cash flows if needed. Apply the recommendation to the editor, then save as a scenario.
 
+**Full Report PDF now includes the optimizer.** Run **Find my retirement plan**, then click **Export Full Report PDF** (in the header or beneath the recommendation). A detailed simulation is not required for this export. If you also run **Run Simulation** using the same inputs, the PDF combines the optimizer pages with the existing simulation summary, allocation comparison, decision-support pages, charts and representative-path ledger. Each analysis keeps its own settings/path labels. Input changes clear outdated results; rerun the relevant analysis before exporting. Use **Save PDF** if an automatic download is blocked.
+
+Optimizer pages include the recommended age, requested-spending success and interval, separately validated spending capacity, withdrawal policies, strategy alternatives, lifetime taxes, after-tax ending values, retirement-age tests, historical/bootstrap checks, input assumptions, an illustrative annual withdrawal path, and irregular-expense details/audit. Dollar bases and unconfirmed estimates are labelled. Report generation reads existing results and does not rerun or change the financial model.
+
 The original detailed simulator, expense editor, historical/hybrid runs, allocation comparisons, stress tests, scenarios, and PDF/CSV/JSON exports remain under the detailed section. A planning horizon of age 95 means the model funds annual steps until the 95th birthday, preserving the original horizon convention. The optimizer requires whole-year ages.
 
 A direct `file://` launch is not the supported PWA/worker path. Use HTTP localhost or HTTPS hosting. The legacy calculator's single-file reference remains available for inspection.

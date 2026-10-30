@@ -1,5 +1,6 @@
 from pathlib import Path
 import re,json
+from report_integration import integrate
 root=Path(__file__).resolve().parents[1]
 h=(root/'index.html').read_text()
 assert 'id="optimizerDashboard"' not in h,'Run prepare-modules.py first'
@@ -37,7 +38,7 @@ h=h.replace('<main>','<main>\n'+quick,1)
 h=h.replace('<div class="grid">','<details id="detailedSimulator" class="detailed-simulator"><summary>Detailed simulator · assumptions, expenses, scenarios and charts</summary><div class="grid">',1)
 h=h.replace('<div class="footer">','</details>\n<div class="footer">',1)
 h=h.replace('BC Retirement Decision Simulator v4.0 • Model date: August 2026','BC Retirement Optimizer v4.1.0-dev • Rules reviewed: October 29, 2026')
-h=h.replace('<script src="optimizer/ui.js">','<script src="optimizer/optimizer.js"></script><script src="optimizer/storage.js"></script><script src="optimizer/ui.js">')
+h=h.replace('<script src="optimizer/ui.js">','<script src="optimizer/optimizer.js"></script><script src="optimizer/report.js"></script><script src="optimizer/storage.js"></script><script src="optimizer/ui.js">')
 h=h.replace('</body>','<script>if(location.protocol!=="file:"&&"serviceWorker" in navigator)navigator.serviceWorker.register("./sw.js");</script></body>')
 h=h.replace("The engine converts geometric assumptions to arithmetic means for Monte Carlo. For equities it also adds back FP Canada's 0.50% safety margin before the conversion.","Select the return model in Planning preferences. Geometric mode uses these assumptions directly. Original mode converts to arithmetic means and adds back the 0.50% equity safety margin.")
 h=h.replace('It does not model every T2 pool or GRIP/ERDTOH distinction.','The updated model tracks separate eligible/non-eligible RDTOH and GRIP when enabled. It remains a simplified investment-only CCPC model, not a T2 return.')
@@ -47,10 +48,10 @@ h=h.replace('holds at 2026','holds at 2026')
 p=root/'optimizer/legacy-ui.js';s=p.read_text()
 s=re.sub(r'function v40ReadStore\(\)\{[^\n]*', 'function v40ReadStore(){return OptimizerStorage.read();}',s)
 s=re.sub(r'function v40WriteStore\(d\)\{[^\n]*','function v40WriteStore(d){OptimizerStorage.write(d);}',s)
-p.write_text(s)
+p.write_text(integrate(s))
 m=json.loads((root/'manifest.json').read_text());m['name']='Retirement Optimizer 4.1 Development';(root/'manifest.json').write_text(json.dumps(m,indent=2)+'\n')
 files=['./','./index.html','./manifest.json','./icons/icon-192.png','./icons/icon-512.png']+[str(x.relative_to(root)) for x in sorted((root/'optimizer').glob('*')) if x.suffix in ('.css','.js') and '.inc.' not in x.name]
-sw="""const VERSION='retirement-4.1.0-dev-1';
+sw="""const VERSION='retirement-4.1.0-dev-2-pdf';
 const CACHE=VERSION+'-'+self.registration.scope;
 const SHELL=%s;
 self.addEventListener('install',e=>e.waitUntil(caches.open(CACHE).then(c=>c.addAll(SHELL))));

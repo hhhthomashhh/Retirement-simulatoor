@@ -10,7 +10,7 @@ for p in (r/'optimizer').glob('*.js'):subprocess.run(['node','--check',str(p)],c
 subprocess.run(['node','--check',str(r/'sw.js')],check=True,capture_output=True)
 sw=(r/'sw.js').read_text();assets=json.loads(re.search(r'const SHELL=(\[.*?\]);',sw)[1])
 for url in assets:assert (r/url).exists(),url
-for url in ['optimizer/worker.js','optimizer/engine.js','optimizer/optimizer.js','optimizer/storage.js','optimizer/ui.js']:
+for url in ['optimizer/worker.js','optimizer/engine.js','optimizer/optimizer.js','optimizer/storage.js','optimizer/report.js','optimizer/ui.js']:
  assert url in assets,'Missing offline shell asset '+url
 # Only self-hosted runtime assets; no analytics or network API dependencies.
 assert not re.search(r'<script[^>]+src="https?://',h)
